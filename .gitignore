@@ -17,7 +17,6 @@ build
 *.egg
 imagenet_dogs
 n0208*
-*.csv
 *.xlsx
 *.log
 log.txt
