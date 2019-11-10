@@ -9,16 +9,39 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import logging
+
+import sys
+import os
+
+base_path = os.path.abspath(os.path.dirname(__file__))
+for i in range(3):
+    base_path = os.path.dirname(base_path)
+sys.path.append(base_path)
+
+import config
+
 BOT_NAME = 'stock_crawler'
+try:
+    LOG_LEVEL = config.LOG_LEVEL
+except:
+    pass
+#LOG_FILE = '../../tmp/sina_stock_crawler.log'
+try:
+    LOG_FILE = config.LOG_FILE
+except:
+    pass
 
 SPIDER_MODULES = ['stock_crawler.spiders']
 NEWSPIDER_MODULE = 'stock_crawler.spiders'
 
-STOCK_LIST_FILES = ['../tmp/stocks.csv']
-QUARTERS = ['2014-4', '2015-4', '2016-4', '2017-4', '2018-1', '2018-2', '2018-3', '2018-4', '2019-1', '2019-2', '2019-3']
+# STOCK_LIST_FILE = '../../tmp/stocks.csv'
+STOCK_LIST_FILE = config.STOCK_LIST_FILE
+QUARTERS = config.QUARTERS
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'stock_crawler (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -69,6 +92,9 @@ ROBOTSTXT_OBEY = True
 #ITEM_PIPELINES = {
 #    'stock_crawler.pipelines.StockCrawlerPipeline': 300,
 #}
+ITEM_PIPELINES = {
+    'stock_crawler.pipelines.StockCrawlerPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

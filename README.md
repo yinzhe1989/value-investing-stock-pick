@@ -56,7 +56,7 @@
 - 数据来源
 总资产周转率各大网站均可获取
 - 过滤条件
-总资产周转率超过 100%
+年总资产周转率超过 100%
 
 ### 季度收入增长率
 
@@ -114,14 +114,14 @@
     `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=601318&typecode=INSPREMCASH&cate=xjll3`
     2. 销售收入
     `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=600900&type=BIZINCO&cate=liru0`
-    3. 净资产收益率
-    `http://money.finance.sina.com.cn/corp/view/vFD_FinancialGuideLineHistory.php?stockid=601318&typecode=financialratios59`
+    3. （加权）净资产收益率
+    `http://money.finance.sina.com.cn/corp/view/vFD_FinancialGuideLineHistory.php?stockid=601318&typecode=financialratios62`
     4. 总资产周转率
     `http://money.finance.sina.com.cn/corp/view/vFD_FinancialGuideLineHistory.php?stockid=601318&typecode=financialratios21`
     5. 商誉
-    `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=601318&type=GOODWILL&cate=zcfz3`
+    `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=601318&type=GOODWILL&cate=zcfz0`
     6. 归属于母公司股东权益
-    `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=601318&type=PARESHARRIGH&cate=zcfz3`
+    `http://money.finance.sina.com.cn/corp/view/vFD_FinanceSummaryHistory.php?stockid=601318&type=PARESHARRIGH&cate=zcfz0`
     7. 销售毛利率
     `http://money.finance.sina.com.cn/corp/view/vFD_FinancialGuideLineHistory.php?stockid=600900&typecode=financialratios36`
 
@@ -130,29 +130,52 @@
 获取及计算到的股票财务和指标数据存储在redis中，存储为hash数据类型。以迈瑞医疗（300760）2019第2季度为例：
 
 1. 现金收入比：
-    key：300760:2019-2
-    field：moneyincomeratio
+    key：{300760}:moneyincomeratio
+    field：20190630
     value：101.0
 2. 净资产收益率
-    key：300760:2019-2
-    field：roe
+    key：{300760}:roe
+    field：20190630
     value：20.1
 3. 总资产周转率
-    key：300760:2019-2
-    field：assetsturnratio
+    key：{300760}:assetsturnratio
+    field：20190630
     value：36.85
 4. 季度收入增长率
-    key：300760:2019-2
-    field：incomegrowthratio
+    key：{300760}:incomegrowthratio
+    field：20190630
     value：18.0
 5. 商誉净资产比
-    key：300760:2019-2
-    field：goodwillequityratio
+    key：{300760}:goodwillequityratio
+    field：20190630
     value：30.0
 6. 毛利率
-    key：300760:2019-2
-    field：grossprofitmarginratio
+    key：{300760}:grossprofitmarginratio
+    field：20190630
     value：65.2
+7. 销售商品提供劳务收到的现金
+    key: {300760}:laborgetcash
+    field: 20190630
+    value: ...
+8. 销售收入
+    key: {300760}:bizinco
+    field: 20190630
+    value: ...
+9. 商誉
+    key: {300760}:goodwill
+    field: 20190630
+    value: ...
+10. 归属于母公司股东权益
+    key: {300760}:equity
+    field: 20190630
+    value: ...
+
+其中，key的stockid用大括号括起来形成hash标签，使得相同stockid的数据存储在redis的同一槽内。
+四个季度分别表示为（以2019年为例）：20190331, 20190630, 20190930, 20191231
+
+另外：
+已经抓取到的股票数据存储在名为`crawlprocessed`的set数据类型中，值为上述各hash的key。
+已经计算过的股票指标数据存储在名为`calcprocessed`的set数据类型中，值为上述各hash的key。
 
 ### 指标计算
 
@@ -161,7 +184,7 @@
 2. 净资产收益率
     roe
 3. 总资产周转率
-    assetsturnratio
+    assetsturnratio*100
 4. 季度收入增长率
     incomegrowthratio=[bizinco(2019-3)-bizinco(2019-2)]/bizinco(2019-2)*100
 5. 商誉净资产比
@@ -170,3 +193,28 @@
     grossprofitmarginratio
 
 ### 过滤选股
+
+1. 现金收入比
+moneyincomeratio >= 100 （过去5年每年）
+
+2. 净资产收益率
+roe > 15 （过去5年每年）
+
+3. 总资产周转率
+assetsturnratio >= 100 （过去5年每年）
+
+4. 季度收入增长率
+incomegrowthratio > 15 （过去8个季度，每季度）
+
+5. 商誉净资产比
+goodwillequityratio < 30  （过去5年每年，或小于50）
+
+6. 毛利率
+grossprofitmarginratio
+    1. 毛利率高点 > 15
+    2. 毛利率稳定
+    3. 同行业相差不大
+
+7. 基础
+总市值>200亿
+流通市值>100亿
