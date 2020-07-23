@@ -23,4 +23,5 @@ log.txt
 download
 .vscode
 .vscode/*
+venv/
 
