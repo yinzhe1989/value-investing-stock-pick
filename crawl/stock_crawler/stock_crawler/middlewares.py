@@ -6,7 +6,31 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import requests
+from config import PROXY_SERVER
 
+def _get_proxy():
+    return requests.get(PROXY_SERVER + "/get/").json().get("proxy")
+
+def _delete_proxy(proxy):
+    requests.get(PROXY_SERVER + "/delete/?proxy={}".format(proxy))
+
+class ProxyMiddleware(object):
+    
+    def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
+        proxy = _get_proxy()
+        spider.logger.debug('proxy: {}'.format(proxy))
+        request.meta['proxy'] = _get_proxy()
+        return None
 
 class StockCrawlerSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
