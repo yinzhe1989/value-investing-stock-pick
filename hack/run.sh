@@ -1,11 +1,14 @@
 #!/bin/bash
 hackdir=$(cd $(dirname $0); pwd)
+workdir=$(cd $(dirname "$hackdir"); pwd)
+export PYTHONPATH="$workdir"
+
 echo 'get all stocks...'
-python $hackdir/../crawl/get_all_stocks.py
+python "$workdir"/crawl/get_all_stocks.py
 echo 'crawl from sina stock...'
-cd $hackdir/../crawl/stock_crawler
+cd "$workdir"/crawl/stock_crawler
 scrapy crawl SinaStockCollector
 echo 'calculate indicators...'
-python $hackdir/../calculate/calc_indicator.py
+python "$workdir"/calculate/calc_indicator.py
 echo 'filte stocks...'
-python $hackdir/../filte/indicator_filter.py
+python "$workdir"/filte/indicator_filter.py

@@ -3,3 +3,5 @@ redis==3.0.1
 redis-py-cluster==2.0.0
 pandas==0.25.2
 tushare==1.2.48
+requests
+bs4

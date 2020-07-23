@@ -3,6 +3,12 @@ import os
 from datetime import date, timedelta
 import pandas
 
+base_path = os.path.abspath(os.path.dirname(__file__))
+base_path = os.path.dirname(base_path)
+tmp_path = os.path.join(base_path, 'tmp')
+if not os.path.isdir(tmp_path):
+    os.mkdir(tmp_path)
+
 if __name__ == '__main__':
     token = os.getenv('TUSHARE_TOKEN')
     if not token:
@@ -36,4 +42,4 @@ if __name__ == '__main__':
     
     # 合并保存
     df = pandas.merge(df_stock_basic, df_daily_basic, how='left', on='ts_code')
-    df.to_csv('../tmp/stocks.csv')
+    df.to_csv(os.path.join(tmp_path, 'stocks.csv'))

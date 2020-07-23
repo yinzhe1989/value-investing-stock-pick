@@ -4,6 +4,9 @@ import sys
 base_path = os.path.abspath(os.path.dirname(__file__))
 base_path = os.path.dirname(base_path)
 sys.path.append(base_path)
+tmp_path = os.path.join(base_path, 'tmp')
+if not os.path.isdir(tmp_path):
+    os.mkdir(tmp_path)
 
 import logging
 from dal import RedisAccessor
@@ -24,13 +27,13 @@ class IndicatorFilter(object):
         # open file for save results
         try:
             self.satisfied_stocks_writer = open(
-                '../tmp/satisfied_stocks.csv', 'wt', encoding='utf-8')
+                os.path.join(tmp_path, 'satisfied_stocks.csv'), 'wt', encoding='utf-8')
             self.satisfied_stocks_writer.write(',symbol,name\n')
         except:
             raise
         try:
             self.filte_result_writer = open(
-                '../tmp/filte_result.csv', 'wt', encoding='utf-8')
+                os.path.join(tmp_path, 'filte_result.csv'), 'wt', encoding='utf-8')
             self.filte_result_writer.write(
                 f'{"":<4},{"symbol":<8},{"name":\u3000<8},'
                 f'{"moneyincomeratio":<22},'
